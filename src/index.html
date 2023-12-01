@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Chat com WebSocket</title>
+  <link href="https://uork.org/css/uork-cdn19.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <style>
+    #chatMessages {
+      list-style-type: none;
+      padding: 0;
+    }
+    .sentMessage {
+      background-color: #cceeff;
+      margin-bottom: 5px;
+      padding: 10px;
+      border-radius: 5px;
+    }
+    .receivedMessage {
+      background-color: #f2f2f2;
+      margin-bottom: 5px;
+      padding: 10px;
+      border-radius: 5px;
+    }
+  </style>
+</head>
+<body>
+    <input type="text" style="font-size: 18px; width: 100px;" class="uork-input" id="messageInput" placeholder="Digite sua mensagem">
+
+  <button class="uork-button" onclick="sendMessage()">Enviar</button>
+  <ul id="chatMessages"></ul>
+  <script>
+    const chatMessages = document.getElementById('chatMessages');
+    const messageInput = document.getElementById('messageInput');
+    const ws = new WebSocket('ws://localhost:2308');
+    
+    function sendMessage() {
+      const message = messageInput.value;
+      if(message == ""){
+        Swal.fire({
+  title: "Não foi possível enviar sua mensagem.",
+  text: "Você não pode enviar mensagens vazias.",
+  icon: "error"
+});
+      } else {
+      ws.send(message);
+      messageInput.value = '';
+
+      displaySentMessage(message);
+      console.log(`Mensagem enviada: ${message}`);
+      }
+    }
+
+    function displaySentMessage(message) {
+      const li = document.createElement('li');
+      li.classList.add('sentMessage'); 
+      li.textContent = `Eu: ${message}`; 
+      chatMessages.appendChild(li);
+    }
+
+    function displayReceivedMessage(message) {
+      const li = document.createElement('li');
+      li.classList.add('receivedMessage'); 
+      li.textContent = `Remetente: ${message}`; 
+      chatMessages.appendChild(li);
+    }
+
+    ws.onmessage = function(event) {
+      const message = event.data;
+
+      displayReceivedMessage(message);
+    };
+  </script>
+</body>
+</html>
